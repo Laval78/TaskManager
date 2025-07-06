@@ -5,7 +5,7 @@ using TaskManager.Application.Interfaces.Service;
 namespace TaskManager.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/TaskList")]
 public class TaskListController : ControllerBase
 {
     private readonly ITaskListService _taskListService;
