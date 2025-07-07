@@ -1,4 +1,5 @@
-﻿using TaskManager.Application.DTO.User;
+﻿using System;
+using TaskManager.Application.DTO.User;
 using TaskManager.Application.Interfaces.Service;
 using TaskManager.Domain.Models;
 
@@ -9,11 +10,11 @@ namespace TaskManager.Infrastructure.Services
     /// </summary>
     public class UserService : IUserService
     {
-        private readonly TaskManagerContext _context;
+        private readonly IUserRepository _userRepository;
 
-        public UserService(TaskManagerContext context)
+        public UserService(IUserRepository userRepository)
         {
-            _context = context;
+            _userRepository = userRepository;
         }
 
         /// <summary>
@@ -26,8 +27,7 @@ namespace TaskManager.Infrastructure.Services
                 Name = dto.Name
             };
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            await _userRepository.AddAsync(user);
         }
     }
 }

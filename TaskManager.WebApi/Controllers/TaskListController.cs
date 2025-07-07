@@ -2,57 +2,58 @@
 using TaskManager.Application.DTO.TaskList;
 using TaskManager.Application.Interfaces.Service;
 
-namespace TaskManager.API.Controllers;
-
-[ApiController]
-[Route("api/TaskList")]
-[RequireUserIdHeader]
-public class TaskListController : ControllerBase
+namespace TaskManager.WebApi.Controllers
 {
-    private readonly ITaskListService _taskListService;
-
-    public TaskListController(ITaskListService taskListService)
+    [ApiController]
+    [Route("api/tasklists")]
+    [RequireUserIdHeader]
+    public class TaskListController : ControllerBase
     {
-        _taskListService = taskListService;
-    }
+        private readonly ITaskListService _taskListService;
 
-    // Получаем UserId из HttpContext (устанавливается в middleware)
-    private int UserId => HttpContext.Items.TryGetValue("UserId", out var value) && value is int id
-        ? id
-        : throw new UnauthorizedAccessException("User ID is missing from request context.");
+        public TaskListController(ITaskListService taskListService)
+        {
+            _taskListService = taskListService;
+        }
 
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] PostTaskListDto dto)
-    {
-        var id = await _taskListService.CreateAsync(dto, UserId);
-        return CreatedAtAction(nameof(GetById), new { id }, new { id });
-    }
+        private int UserId => HttpContext.Items.TryGetValue("UserId", out var value) && value is int id
+            ? id
+            : throw new UnauthorizedAccessException("User ID is missing from request context.");
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-    {
-        var result = await _taskListService.GetAllAsync(UserId, page, pageSize);
-        return Ok(result);
-    }
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] PostTaskListDto dto)
+        {
+            var id = await _taskListService.CreateAsync(dto, UserId);
+            return CreatedAtAction(nameof(GetById), new { id }, new { id });
+        }
 
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id)
-    {
-        var result = await _taskListService.GetByIdAsync(id, UserId);
-        return result == null ? NotFound() : Ok(result);
-    }
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = await _taskListService.GetAllAsync(UserId, page, pageSize);
+            return Ok(result);
+        }
 
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, [FromBody] PutTaskListDto dto)
-    {
-        var success = await _taskListService.UpdateAsync(id, dto, UserId);
-        return success ? NoContent() : Forbid();
-    }
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var result = await _taskListService.GetByIdAsync(id, UserId);
+            return Ok(result);
+        }
 
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var success = await _taskListService.DeleteAsync(id, UserId);
-        return success ? NoContent() : Forbid();
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] PutTaskListDto dto)
+        {
+            await _taskListService.UpdateAsync(id, dto, UserId);
+            return NoContent();
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _taskListService.DeleteAsync(id, UserId);
+            return NoContent();
+        }
     }
 }
+

@@ -10,7 +10,7 @@ public class TaskListUserService : ITaskListUserService
 {
     private readonly ITaskListUserRepository _taskListUserRepository;
 
-    public TaskListUserService(ITaskListUserRepository taskListUserRepository)
+    public TaskListUserService(ITaskListUserRepository taskListUserRepository, ITaskListRepository @object)
     {
         _taskListUserRepository = taskListUserRepository;
     }

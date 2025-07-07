@@ -7,6 +7,9 @@ using TaskManager.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 builder.Configuration
 .SetBasePath(Directory.GetCurrentDirectory())
 .AddJsonFile("appsettings.json", optional: false)
@@ -19,7 +22,7 @@ options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")
 b => b.MigrationsAssembly("TaskManager.Infrastructure")));
 
 // Реєстрація сервісів у DI контейнері
-builder.Services.AddScoped<IUsersRepository, UsersRepository>();
+builder.Services.AddScoped<IUserRepository, UsersRepository>();
 builder.Services.AddScoped<ITaskListRepository, TaskListRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITaskListService, TaskListService>();
@@ -51,9 +54,9 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.UseMiddleware<RequireUserIdHeaderMiddleware>();
-
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseMiddleware<RequireUserIdHeaderMiddleware>();
 
 app.MapControllers();
 

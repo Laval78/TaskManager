@@ -1,6 +1,6 @@
 ﻿using TaskManager.Domain.Models;
 
-public interface IUsersRepository
+public interface IUserRepository
 {
     Task AddAsync(User user);
 }

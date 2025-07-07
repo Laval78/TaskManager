@@ -2,7 +2,7 @@
 
 namespace TaskManager.Infrastructure.Repositories;
 
-public class UsersRepository : IUsersRepository
+public class UsersRepository : IUserRepository
 {
     private readonly TaskManagerContext _context;
 

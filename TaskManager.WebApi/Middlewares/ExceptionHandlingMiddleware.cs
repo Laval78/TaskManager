@@ -1,47 +1,40 @@
 ﻿using System.Net;
 using System.Text.Json;
-using Microsoft.AspNetCore.Http;
-using TaskManager.Application.Exceptions;
+
 
 public class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
-    public ExceptionHandlingMiddleware(RequestDelegate next)
+    private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+
+    public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
 
-    public async Task Invoke(HttpContext context)
+    public async Task InvokeAsync(HttpContext context)
     {
         try
         {
-            await _next(context); // Передаём дальше
+            await _next(context); // передаём управление дальше
         }
         catch (Exception ex)
         {
-            await HandleExceptionAsync(context, ex);
+            _logger.LogError(ex, "Unhandled exception occurred.");
+
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            context.Response.ContentType = "application/json";
+
+            var errorResponse = new
+            {
+                message = "Внутрішня помилка сервера",
+                detail = ex.Message, // Можно скрыть в проде
+                path = context.Request.Path
+            };
+
+            var json = JsonSerializer.Serialize(errorResponse);
+            await context.Response.WriteAsync(json);
         }
-    }
-
-    private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
-    {
-        var code = exception switch
-        {
-            NotFoundException => HttpStatusCode.NotFound,
-            BadRequestException => HttpStatusCode.BadRequest,
-            ForbiddenException => HttpStatusCode.Forbidden,
-            _ => HttpStatusCode.InternalServerError
-        };
-
-        var result = JsonSerializer.Serialize(new
-        {
-            error = exception.Message,
-            statusCode = (int)code
-        });
-
-        context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)code;
-
-        await context.Response.WriteAsync(result);
     }
 }
