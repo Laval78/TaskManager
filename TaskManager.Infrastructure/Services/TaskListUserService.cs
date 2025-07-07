@@ -1,4 +1,5 @@
 ﻿using TaskManager.Application.DTO.TaskListUser;
+using TaskManager.Application.Exceptions;
 using TaskManager.Application.Interfaces.Repositories;
 using TaskManager.Application.Interfaces.Service;
 using TaskManager.Domain.Models;
@@ -17,15 +18,30 @@ public class TaskListUserService : ITaskListUserService
     public async Task<bool> AddUserToTaskListAsync(int taskListId, PostTaskListUserDto dto, int currentUserId)
     {
         var taskList = await _taskListUserRepository.GetTaskListWithUsersAsync(taskListId);
+        if (taskList == null)
+        {
+            throw new NotFoundException("Список задач не знайдено");
+        }
 
-        if (taskList == null || taskList.WhoCreated != currentUserId)
-            return false;
+        if (dto.UserId == currentUserId)
+        {
+            throw new BadRequestException("Неможливо додати самого себе до списку задач");
+        }
 
-        if (taskList.TaskListUsers.Count >= 3)
-            return false;
+        if (taskList.WhoCreated != currentUserId)
+        {
+            throw new ForbiddenException("Тільки власник може додати користувача до списку задач");
+        }
 
         if (taskList.TaskListUsers.Any(x => x.IdUser == dto.UserId))
-            return false;
+        {
+            throw new BadRequestException("Цей користувач вже доданий до списку задач");
+        }
+
+        if (taskList.TaskListUsers.Count >= 3)
+        {
+            throw new BadRequestException("До списку задач можна додати максимум 3-х користувачів");
+        }
 
         var newLink = new TaskListUser
         {
@@ -41,9 +57,12 @@ public class TaskListUserService : ITaskListUserService
     {
         var taskList = await _taskListUserRepository.GetTaskListWithUsersAsync(taskListId);
 
-        if (taskList == null || (taskList.WhoCreated != currentUserId &&
-            !taskList.TaskListUsers.Any(x => x.IdUser == currentUserId)))
-            return Enumerable.Empty<GetTaskListUserDto>();
+        if (taskList == null)
+            throw new NotFoundException("Список задач не знайдено");
+
+        if (taskList.WhoCreated != currentUserId &&
+            !taskList.TaskListUsers.Any(x => x.IdUser == currentUserId))
+            throw new ForbiddenException("У вас немає доступу до цього списку задач");
 
         return taskList.TaskListUsers.Select(tu => new GetTaskListUserDto
         {
@@ -56,12 +75,15 @@ public class TaskListUserService : ITaskListUserService
     {
         var taskList = await _taskListUserRepository.GetTaskListWithUsersAsync(taskListId);
 
-        if (taskList == null || (taskList.WhoCreated != currentUserId && currentUserId != userIdToRemove))
-            return false;
+        if (taskList == null)
+            throw new NotFoundException("Список задач не знайдено");
+
+        if (taskList.WhoCreated != currentUserId && currentUserId != userIdToRemove)
+            throw new ForbiddenException("Тільки власник або сам користувач може видалити доступ");
 
         var link = taskList.TaskListUsers.FirstOrDefault(tu => tu.IdUser == userIdToRemove);
         if (link == null)
-            return false;
+            throw new NotFoundException("Цей користувач не знайдений у списку задач");
 
         await _taskListUserRepository.RemoveUserFromTaskListAsync(link);
         return true;

@@ -1,66 +1,84 @@
 ﻿using TaskManager.Application.DTO.TaskList;
+using TaskManager.Application.Exceptions;
 using TaskManager.Application.Interfaces.Service;
 using TaskManager.Application.Mappers;
 using TaskManager.Domain.Models;
 
-namespace TaskManager.Infrastructure.Services
+namespace TaskManager.Infrastructure.Services;
+
+/// <summary>
+/// Сервіс для роботи зі списками задач
+/// </summary>
+public class TaskListService : ITaskListService
 {
-    /// <summary>
-    /// Сервіс для роботи зі списками задач
-    /// </summary>
-    public class TaskListService : ITaskListService
+    private readonly ITaskListRepository _repository;
+
+    public TaskListService(ITaskListRepository repository)
     {
-        private readonly ITaskListRepository _repository;
+        _repository = repository;
+    }
 
-        public TaskListService(ITaskListRepository repository)
+    public async Task<int> CreateAsync(PostTaskListDto dto, int userId)
+    {
+        var taskList = new TaskList
         {
-            _repository = repository;
+            Title = dto.Title,
+            DateTimeCreated = DateTime.UtcNow,
+            WhoCreated = userId
+        };
+
+        return await _repository.CreateAsync(taskList);
+    }
+
+    public async Task<IEnumerable<GetTaskListForListDto>> GetAllAsync(int userId, int page, int pageSize)
+    {
+        var taskLists = await _repository.GetAllForUserAsync(userId, page, pageSize);
+        return taskLists.Select(t => t.ToGetTaskListForListDto());
+    }
+
+    public async Task<GetTaskListDto> GetByIdAsync(int id, int userId)
+    {
+        var taskList = await _repository.GetByIdWithCreatorAsync(id, userId);
+        if (taskList == null)
+        {
+            throw new NotFoundException("Список задач не знайдено або у вас немає до нього доступу");
         }
 
-        public async Task<int> CreateAsync(PostTaskListDto dto, int userId)
-        {
-            var taskList = new TaskList
-            {
-                Title = dto.Title,
-                DateTimeCreated = DateTime.UtcNow,
-                WhoCreated = userId
-            };
+        return taskList.ToGetTaskListDto();
+    }
 
-            return await _repository.CreateAsync(taskList);
+    public async Task UpdateAsync(int id, PutTaskListDto dto, int userId)
+    {
+        var taskList = await _repository.GetByIdAsync(id);
+
+        if (taskList == null)
+        {
+            throw new NotFoundException("Список задач не знайдено");
         }
 
-        public async Task<IEnumerable<GetTaskListForListDto>> GetAllAsync(int userId, int page, int pageSize)
+        if (taskList.WhoCreated != userId)
         {
-            var taskLists = await _repository.GetAllForUserAsync(userId, page, pageSize);
-            return taskLists.Select(t => t.ToGetTaskListForListDto());
+            throw new ForbiddenException("Тільки власник може змінювати список задач");
         }
 
-        public async Task<GetTaskListDto?> GetByIdAsync(int id, int userId)
+        taskList.Title = dto.Title;
+        await _repository.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(int id, int userId)
+    {
+        var taskList = await _repository.GetByIdAsync(id);
+
+        if (taskList == null)
         {
-            var taskList = await _repository.GetByIdWithCreatorAsync(id, userId);
-            return taskList?.ToGetTaskListDto();
+            throw new NotFoundException("Список задач не знайдено");
         }
 
-        public async Task<bool> UpdateAsync(int id, PutTaskListDto dto, int userId)
+        if (taskList.WhoCreated != userId)
         {
-            var taskList = await _repository.GetByIdAsync(id);
-
-            if (taskList == null || taskList.WhoCreated != userId)
-                return false;
-
-            taskList.Title = dto.Title;
-            await _repository.SaveChangesAsync();
-            return true;
+            throw new ForbiddenException("Тільки власник може видалити список задач");
         }
 
-        public async Task<bool> DeleteAsync(int id, int userId)
-        {
-            var taskList = await _repository.GetByIdAsync(id);
-
-            if (taskList == null || taskList.WhoCreated != userId)
-                return false;
-
-            return await _repository.DeleteAsync(taskList);
-        }
+        await _repository.DeleteAsync(taskList);
     }
 }

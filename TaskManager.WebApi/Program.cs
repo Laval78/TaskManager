@@ -13,12 +13,12 @@ builder.Configuration
 .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
 .AddEnvironmentVariables();
 
-// ?? Підключення контексту БД
+// Підключення контексту БД
 builder.Services.AddDbContext<TaskManagerContext>(options =>
 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
 b => b.MigrationsAssembly("TaskManager.Infrastructure")));
 
-// ? Реєстрація сервісів у DI контейнері
+// Реєстрація сервісів у DI контейнері
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 builder.Services.AddScoped<ITaskListRepository, TaskListRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -50,6 +50,10 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseMiddleware<RequireUserIdHeaderMiddleware>();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapControllers();
 
