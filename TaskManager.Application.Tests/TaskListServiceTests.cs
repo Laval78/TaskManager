@@ -14,7 +14,7 @@ public class TaskListServiceTests
     public TaskListServiceTests()
     {
         _repositoryMock = new Mock<ITaskListRepository>();
-        _service = new TaskListService(_repositoryMock.Object);
+        _service = new TaskListService(_repositoryMock.Object, null!);
     }
 
     [Fact]

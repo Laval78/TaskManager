@@ -20,6 +20,12 @@ namespace TaskManager.WebApi.Controllers
             ? id
             : throw new UnauthorizedAccessException("User ID is missing from request context.");
 
+        /// <summary>
+        /// Додає користувача до вказаного списку задач
+        /// </summary>
+        /// <param name="taskListId">ID списку задач, до якого додається користувач</param>
+        /// <param name="dto">Обʼєкт з даними користувача, якого потрібно додати</param>
+        /// <returns>Підтвердження успішного додавання</returns>
         [HttpPost]
         public async Task<IActionResult> AddUserToTaskList(int taskListId, [FromBody] PostTaskListUserDto dto)
         {
@@ -27,6 +33,11 @@ namespace TaskManager.WebApi.Controllers
             return Ok(new { message = "Користувача додано до списку задач" });
         }
 
+        /// <summary>
+        /// Отримує список користувачів, які мають доступ до певного списку задач
+        /// </summary>
+        /// <param name="taskListId">ID списку задач</param>
+        /// <returns>Список користувачів, повʼязаних зі списком задач</returns>
         [HttpGet]
         public async Task<IActionResult> GetUsersForTaskList(int taskListId)
         {
@@ -34,6 +45,12 @@ namespace TaskManager.WebApi.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Видаляє користувача зі списку задач
+        /// </summary>
+        /// <param name="taskListId">ID списку задач</param>
+        /// <param name="userIdToRemove">ID користувача, якого потрібно видалити</param>
+        /// <returns>Підтвердження успішного видалення</returns>
         [HttpDelete("{userIdToRemove}")]
         public async Task<IActionResult> RemoveUserFromTaskList(int taskListId, int userIdToRemove)
         {

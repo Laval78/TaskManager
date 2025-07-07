@@ -16,8 +16,10 @@ namespace TaskManager.WebApi.Controllers
         }
 
         /// <summary>
-        /// Створення нового користувача
+        /// Створює нового користувача
         /// </summary>
+        /// <param name="dto">Дані нового користувача</param>
+        /// <returns>Повідомлення про успішне створення</returns>
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] PostUserDto dto)
         {

@@ -11,5 +11,16 @@
         public virtual User IdUserNavigation { get; set; }
 
         public virtual TaskList IdTaskListNavigation { get; set; }
+
+        public TaskListUser(int Id, int IdTask, int IdUser)
+        {
+            this.Id = Id;
+            this.IdTask = IdTask;
+            this.IdUser = IdUser;
+        }
+
+        public TaskListUser()
+        {
+        }
     }
 }
