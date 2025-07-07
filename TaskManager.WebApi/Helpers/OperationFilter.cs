@@ -5,7 +5,7 @@ public class AddRequiredHeaderParameter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        // Проверяем, есть ли атрибут на методе или контроллере
+        // Перевіряємо, чи є атрибут RequireUserIdHeaderAttribute на класі або методі
         var hasAttribute = context.MethodInfo.DeclaringType?.GetCustomAttributes(true).OfType<RequireUserIdHeaderAttribute>().Any() == true
             || context.MethodInfo.GetCustomAttributes(true).OfType<RequireUserIdHeaderAttribute>().Any();
 
@@ -19,6 +19,7 @@ public class AddRequiredHeaderParameter : IOperationFilter
             Name = "User-Id",
             In = ParameterLocation.Header,
             Required = true,
+            Description = "ID користувача, який виконує запит",
             Schema = new OpenApiSchema
             {
                 Type = "integer",

@@ -17,7 +17,7 @@ public class ExceptionHandlingMiddleware
     {
         try
         {
-            await _next(context); // передаём управление дальше
+            await _next(context);
         }
         catch (Exception ex)
         {
@@ -29,7 +29,7 @@ public class ExceptionHandlingMiddleware
             var errorResponse = new
             {
                 message = "Внутрішня помилка сервера",
-                detail = ex.Message, // Можно скрыть в проде
+                detail = ex.Message,
                 path = context.Request.Path
             };
 

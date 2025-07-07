@@ -18,6 +18,13 @@ public class TaskListUserService : ITaskListUserService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Додає користувача до списку задач.
+    /// </summary>
+    /// <param name="taskListId">ID списку задач.</param>
+    /// <param name="dto">Дані користувача, якого потрібно додати.</param>
+    /// <param name="currentUserId">ID поточного користувача (того, хто виконує дію).</param>
+    /// <returns>Повертає true, якщо користувача успішно додано.</returns>
     public async Task<bool> AddUserToTaskListAsync(int taskListId, PostTaskListUserDto dto, int currentUserId)
     {
         _logger.LogInfo($"Спроба додати користувача {dto.UserId} до списку задач {taskListId} користувачем {currentUserId}");
@@ -65,6 +72,12 @@ public class TaskListUserService : ITaskListUserService
         return true;
     }
 
+    /// <summary>
+    /// Отримує список користувачів, які мають доступ до вказаного списку задач.
+    /// </summary>
+    /// <param name="taskListId">ID списку задач.</param>
+    /// <param name="currentUserId">ID поточного користувача.</param>
+    /// <returns>Список користувачів у вигляді DTO.</returns>
     public async Task<IEnumerable<GetTaskListUserDto>> GetUsersForTaskListAsync(int taskListId, int currentUserId)
     {
         _logger.LogInfo($"Отримання користувачів для списку {taskListId} запрошено користувачем {currentUserId}");
@@ -93,6 +106,13 @@ public class TaskListUserService : ITaskListUserService
         });
     }
 
+    /// <summary>
+    /// Видаляє користувача зі списку задач.
+    /// </summary>
+    /// <param name="taskListId">ID списку задач.</param>
+    /// <param name="userIdToRemove">ID користувача, якого потрібно видалити.</param>
+    /// <param name="currentUserId">ID поточного користувача.</param>
+    /// <returns>Повертає true, якщо користувача успішно видалено.</returns>
     public async Task<bool> RemoveUserFromTaskListAsync(int taskListId, int userIdToRemove, int currentUserId)
     {
         _logger.LogInfo($"Спроба видалити користувача {userIdToRemove} зі списку {taskListId} користувачем {currentUserId}");

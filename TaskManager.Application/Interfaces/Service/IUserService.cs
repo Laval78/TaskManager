@@ -3,7 +3,7 @@
 namespace TaskManager.Application.Interfaces.Service
 {
     /// <summary>
-    /// Інтерфейс сервісу користувачів (мінімальний функціонал)
+    /// Інтерфейс сервісу користувачів
     /// </summary>
     public interface IUserService
     {

@@ -19,13 +19,10 @@ public class UserServiceTests
     [Fact]
     public async Task CreateAsync_ShouldCallRepository_WithCorrectUser()
     {
-        // Arrange
         var dto = new PostUserDto { Name = "Test User" };
 
-        // Act
         await _userService.CreateAsync(dto);
 
-        // Assert
         _userRepositoryMock.Verify(r => r.AddAsync(It.Is<User>(
             u => u.Name == dto.Name
         )), Times.Once);

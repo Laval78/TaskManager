@@ -23,7 +23,6 @@
                 return;
             }
 
-            // Можешь сохранить UserId в context.Items["UserId"] если нужно
             context.Items["UserId"] = parsedUserId;
         }
 

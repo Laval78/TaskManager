@@ -2,6 +2,9 @@
 
 namespace TaskManager.Application.Interfaces.Service
 {
+    /// <summary>
+    /// Інтерфейс сервіс для керування користувачами в списках задач.
+    /// </summary>
     public interface ITaskListUserService
     {
         Task<bool> AddUserToTaskListAsync(int taskListId, PostTaskListUserDto dto, int currentUserId);
